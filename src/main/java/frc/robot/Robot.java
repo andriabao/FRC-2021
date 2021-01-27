@@ -13,11 +13,15 @@ import edu.wpi.first.wpilibj.TimedRobot;
  * project.
  */
 public class Robot extends TimedRobot {
-  
+  public static DriveSubsystem driveSubsystem = new DriveSubsystem();
   public static DriveWithJoystick = new DriveWithJoystick();
 
   @Override
   public void robotInit() {
+    driveSubsystem.setDefaultCommand(driveWithJoystick);
+    // ballHandler.setDefaultCommand(new HandleBallWithJoystick());
+    // climber.setDefaultCommand(new ClimbWithJoystick());
+    // panelTurner.setDefaultCommand(new TurnPanelWithJoystick());
 
   }
 

@@ -45,6 +45,16 @@ public class Robot extends TimedRobot {
   private CANSparkMax one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen,
       fifteen, sixteen;
 
+  private int intake = -1;
+  private int shooter = -1;
+
+  private CANSparkMax ballIntake = new CANSparkMax(26, MotorType.kBrushless);
+  private CANSparkMax intakeConveyer = new CANSparkMax(22, MotorType.kBrushless);
+
+  private CANSparkMax shooterMaster = new CANSparkMax(31, MotorType.kBrushless);
+  private CANSparkMax shooterSlave = new CANSparkMax(32, MotorType.kBrushless);
+  private CANSparkMax shooterConveyer = new CANSparkMax(23, MotorType.kBrushless);
+
   public static ExecutorService cocurrentExecutor = Executors.newFixedThreadPool(1);
 
   public static double matchStartTime;
@@ -52,8 +62,6 @@ public class Robot extends TimedRobot {
   private static Control control = Control.getInstance();
 
   public void robotInit() {
-
-    Joystick joystick = new Joystick(0);
 
     one = new CANSparkMax(11, MotorType.kBrushless);
     setSpark(one);
@@ -104,101 +112,69 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+
+    ballIntake.setInverted(true);
+    ballIntake.setSmartCurrentLimit(30);
+    ballIntake.burnFlash();
+
+    intakeConveyer.setIdleMode(IdleMode.kBrake);
+    intakeConveyer.setSmartCurrentLimit(10);
+    intakeConveyer.burnFlash();
+    
+    shooterMaster.setInverted(true);
+    shooterMaster.setClosedLoopRampRate(0.3);
+
+    shooterSlave.follow(shooterMaster, true);
+    
+    shooterConveyer.setInverted(true);
+    shooterConveyer.setIdleMode(IdleMode.kBrake);
+    shooterConveyer.setSmartCurrentLimit(20);
+    shooterConveyer.burnFlash();
+
+
     Joystick drive = new Joystick(1);
 
-    double Y = drive.getRawAxis(1);
-    double X = drive.getRawAxis(0);
-    double pressed = drive.getRawAxis(3);
+    double Y = 0.5*drive.getRawAxis(1);
+    double X = 0.5*drive.getRawAxis(0);
+    
+    if(drive.getRawButtonPressed(5)) {
+      intake *= -1;
+    }
+
+    if(drive.getRawButtonPressed(6)) {
+      shooter *= -1;
+    }
+
+    if (intake == 1) {
+      ballIntake.set(0.5);
+      intakeConveyer.set(0.5);
+    } else {
+      ballIntake.set(0);
+      intakeConveyer.set(0);
+    }
+
+    if (shooter == 1) {
+      shooterConveyer.set(0.5);
+      shooterMaster.set(1);
+    } else {
+      shooterConveyer.set(0);
+      shooterMaster.set(0);
+    }
 
     double leftSpeed = 0;
     double rightSpeed = 0;
 
-    if(pressed > 0){
-      leftSpeed = X;
-      rightSpeed = X;
-    } else {
-      leftSpeed = X + Y;
-      rightSpeed = X - Y;
-    }
+    leftSpeed = X + Y;
+    rightSpeed = X - Y;
     
-    five.set(leftSpeed);
-    six.follow(five);
-    one.follow(five);
+    // five.set(leftSpeed);
+    // six.follow(five);
+    one.set(leftSpeed);
     
     two.set(rightSpeed);
     three.follow(two);
-    //four.follow(two);
+    four.follow(two);
 
    
-    // seven.set(2);
-    // try {
-    //   wait(1000);
-    // } catch (InterruptedException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
-    // }
-    // eight.set(2);
-    // try {
-    //   wait(1000);
-    // } catch (InterruptedException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
-    // }
-    // nine.set(2);
-    // try {
-    //   wait(1000);
-    // } catch (InterruptedException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
-    // }
-    // ten.set(2);
-    // try {
-    //   wait(1000);
-    // } catch (InterruptedException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
-    // }
-    // eleven.set(2);
-    // try {
-    //   wait(1000);
-    // } catch (InterruptedException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
-    // }
-    // twelve.set(2);
-    // try {
-    //   wait(1000);
-    // } catch (InterruptedException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
-    // }
-    // thirteen.set(2);
-    // try {
-    //   wait(1000);
-    // } catch (InterruptedException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
-    // }
-    // fourteen.set(2);
-    // try {
-    //   wait(1000);
-    // } catch (InterruptedException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
-    // }
-    // fifteen.set(2);
-    // try {
-    //   wait(1000);
-    // } catch (InterruptedException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
-    // }
-    // sixteen.set(2);
-    // try {
-    //   wait(1000);
-    // } catch (InterruptedException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
-    // }
   }
 }
